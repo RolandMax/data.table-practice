@@ -54,17 +54,14 @@ dt[hour > 6 & hour <= 10]
 # For each carrier, find the flight with the longest distance
 dt[dt[, .I[which.max(distance)], by = carrier]$V1]   
   
->>>>>>> first_steps
 # Exercise 10: Join operations
 # Assuming you have another data.table called 'airports' with columns 'iata' and 'city',
 # join it with the flights data to add the origin city name to each flight
 # (Note: You'll need to create the airports data.table first)
-<<<<<<< HEAD
-=======
 airports <- data.table(iata = c("JFK", "LGA", "EWR"),
                        city = c("New York", "New York", "New York"))
 
 dt[airports, on = .(origin = iata)]
->>>>>>> first_steps
+
 
 # Good luck with your exercises!
