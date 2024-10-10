@@ -210,6 +210,12 @@ dt[ ,
           delay = arr_delay + dep_delay)
     ]
 
+# or 
+
+dt[, c("speed", "delay") := .((distance/ air_time * 60),
+                              (arr_delay + dep_delay)
+                              )]
+
 head(dt)
 
 # b) Update some rows of columns by reference - sub-assign by reference
@@ -247,5 +253,5 @@ head(dt)
 in_cols  = c("dep_delay", "arr_delay")
 out_cols = c("max_dep_delay", "max_arr_delay")
 dt[, c(out_cols) := lapply(.SD, max), by = month, .SDcols = in_cols]
-
+# or 
 
