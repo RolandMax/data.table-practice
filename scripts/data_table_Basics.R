@@ -199,3 +199,53 @@ dt[ ,
     by = month]
 
 
+# add, update, delete columns ---------------------------------------------
+
+# using the := operator
+
+# a) Add columns by reference
+
+dt[ ,
+    `:=` (speed = distance/ (air_time) * 60,
+          delay = arr_delay + dep_delay)
+    ]
+
+head(dt)
+
+# b) Update some rows of columns by reference - sub-assign by reference
+
+# – Replace those rows where hour == 24 with the value 0
+# subassign by reference
+
+dt[hour == 24L, hour := 0L]
+
+# c) Delete column by reference
+# – Remove delay column
+
+dt[ ,
+    c("delay") := NULL]
+
+## or using the functional form
+dt[, `:=`(delay = NULL)]
+
+head(dt)
+
+# d) := along with grouping using by
+
+# e.g. – How can we add a new column which contains 
+# for each orig,dest pair the maximum speed?
+dt[,
+    `:=` (max_speed = max(speed)),
+          by = .(origin, dest)]
+
+head(dt)
+
+# e) Multiple columns and :=
+#   – How can we add two more columns computing max() 
+# of dep_delay and arr_delay for each month, using .SD?
+
+in_cols  = c("dep_delay", "arr_delay")
+out_cols = c("max_dep_delay", "max_arr_delay")
+dt[, c(out_cols) := lapply(.SD, max), by = month, .SDcols = in_cols]
+
+
