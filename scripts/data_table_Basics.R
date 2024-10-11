@@ -260,4 +260,37 @@ dt[ ,
 
 # – How can we update multiple existing columns in place using .SD?
 
+# change to factor
+dt[, 
+   names(.SD) := lapply(.SD, as.factor), .SDcols = is.character]
+# change it back
+cols <- sapply(dt, is.factor)
+dt[,
+   names(.SD) := lapply(.SD, as.character), .SDcols = cols]
 
+str(dt)
+
+# a) := for its side effect
+
+str(dt)
+
+foo_funct <- function(DT){    # this function updates the original dt
+  DT[, speed := distance/(air_time * 60)]
+  DT[, .(max_speed = max(speed)), by = month]
+  return(DT)
+  }
+
+foo_funct(dt)
+
+# b) The copy() function
+
+foo_funct_2 <- function(DT){
+  DT <- copy(DT)   # the copy function creates a copy, which doesn´t update the orginal data.table
+  DT[, speed := distance/ (air_time *60)]
+  DT[, .(max_speed = max(speed)), by = month]
+  return(DT)
+}
+
+copy_dt <- foo_funct_2(dt)
+str(dt)
+str(copy_dt)
