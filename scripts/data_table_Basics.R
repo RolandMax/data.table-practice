@@ -253,5 +253,11 @@ head(dt)
 in_cols  = c("dep_delay", "arr_delay")
 out_cols = c("max_dep_delay", "max_arr_delay")
 dt[, c(out_cols) := lapply(.SD, max), by = month, .SDcols = in_cols]
-# or 
+
+dt[ ,
+    c("speed", "max_speed", "max_dep_delay", "max_arr_delay") := NULL] 
+
+
+# – How can we update multiple existing columns in place using .SD?
+
 
