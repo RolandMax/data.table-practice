@@ -294,3 +294,9 @@ foo_funct_2 <- function(DT){
 copy_dt <- foo_funct_2(dt)
 str(dt)
 str(copy_dt)
+
+
+# Keys and fast binary search based subset --------------------------------
+
+# Think of a key as supercharged rownames.
+
