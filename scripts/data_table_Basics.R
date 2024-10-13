@@ -294,3 +294,4 @@ foo_funct_2 <- function(DT){
 copy_dt <- foo_funct_2(dt)
 str(dt)
 str(copy_dt)
+
