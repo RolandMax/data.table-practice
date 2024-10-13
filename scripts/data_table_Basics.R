@@ -300,3 +300,60 @@ str(copy_dt)
 
 # Think of a key as supercharged rownames.
 
+## Set, get and use keys on a data.table
+
+str(dt)
+
+# set key
+setkey(dt, origin)
+# or 
+setkeyv(dt, "origin")
+# The data.table is now reordered (or sorted) 
+#  you can subset by querying those key columns using the .() notation in i.
+
+dt[.("EWR")]
+dt[.("EWR", "JFK")]
+
+# get key
+key(dt)
+
+# multiple key
+setkey(dt, origin, dest)
+key(dt)
+
+## Combining keys with j and by
+
+dt[.("JFK", "MIA"), .(arr_delay)]
+# use chaining to order the column in decreasing order.
+dt[.("JFK", "MIA"), .(arr_delay)][order(-arr_delay)]
+# compute the max delay
+dt[.("JFK", "MIA"), .(max(arr_delay))]
+
+
+# Aggregation using by
+# Get the maximum departure delay for each month corresponding to origin = "JFK". Order the result by month
+dt[.("JFK"), 
+   .(max(dep_delay)),
+   keyby = month]
+# We use keyby to automatically key that result by month. Now we understand what that means. 
+# In addition to ordering, it also sets month as the key column.
+
+
+## Additional arguments - mult and nomatch
+
+# The mult argument
+# choose, for each query, if “all” the matching rows should be returned, or just the “first” or “last” using the mult argument. 
+# The default value is “all”
+
+dt[.("JFK", "MIA"), 
+   .(arr_delay),
+   mult = "first"]
+
+dt[.(c("LGA", "JFK", "EWR"), "XNA"), mult = "last"]
+
+#  The nomatch argument
+# We can choose if queries that do not match should return NA or 
+# be skipped altogether using the nomatch argument.
+
+dt[.(c("JFK", "EWR"), "MIA"), mult = "last", nomatch = NULL]
+  
