@@ -295,8 +295,6 @@ copy_dt <- foo_funct_2(dt)
 str(dt)
 str(copy_dt)
 
-<<<<<<< HEAD
-=======
 
 # Keys and fast binary search based subset --------------------------------
 
@@ -358,5 +356,6 @@ dt[.(c("LGA", "JFK", "EWR"), "XNA"), mult = "last"]
 # be skipped altogether using the nomatch argument.
 
 dt[.(c("JFK", "EWR"), "MIA"), mult = "last", nomatch = NULL]
+
+
   
->>>>>>> first_steps
