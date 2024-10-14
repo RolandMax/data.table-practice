@@ -392,6 +392,42 @@ indices(dt)
 # This eliminates having to do setindex() 
 
 
+# a) Fast subsets in i
+# – Subset all rows where the origin airport matches “JFK” using on
+dt[.("JFK"), on = "origin"]
+# creates a secondary index, uses it for fast subsetting and then discards the secondary index again
+
+# – How can I subset based on origin and dest columns?
+dt[.("JFK", "MIA"), on = c("origin", "dest")]
+
+# – Return arr_delay column alone as a 
+# data.table corresponding to origin = "LGA" and dest = "TPA"
+dt[.("LGA", "TPA"), .(arr_delay), on = c("origin", "dest")]
+
+# – On the result obtained above, 
+# use chaining to order the column in decreasing order.
+dt[.("LGA", "TPA"), .(arr_delay), on = c("origin", "dest")][order(-arr_delay)]
+
+# Compute or do in j
+# – Find the maximum arrival delay corresponding to origin = "LGA" and dest = "TPA".
+dt[.("LGA", "TPA"), max(arr_delay), on = c("origin", "dest")]
+
+# Aggregation using by
+# – Get the maximum departure delay for each month corresponding to origin = "JFK". 
+# Order the result by month
+dt[.("JFK"), .(max_delay_month = max(dep_delay)), keyby = .(month), on = "origin"]
 
 
+# w/ the mult argument
+# – Subset only the first matching row where dest matches “BOS” and “DAY”
+dt[c("BOS", "DAY"), on = "dest", mult = "first"]
+
+# – Subset only the last matching row where 
+# origin matches “LGA”, “JFK”, “EWR” and dest matches “XNA”
+dt[.(c("LGA", "JFK", "EWR"), "XNA"), on = c("origin", "dest"), mult = "last"]
+
+# h) The nomatch argument
+# We can choose if queries that do not match should return 
+# NA or be skipped altogether using the nomatch argument.
+dt[.(c("LGA", "JFK", "EWR"), "XNA"), on = c("origin", "dest"), mult = "last", nomatch = NULL]
 
