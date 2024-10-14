@@ -358,4 +358,40 @@ dt[.(c("LGA", "JFK", "EWR"), "XNA"), mult = "last"]
 dt[.(c("JFK", "EWR"), "MIA"), mult = "last", nomatch = NULL]
 
 
-  
+
+# Secondary Indices -------------------------------------------------------
+# https://cloud.r-project.org/web/packages/data.table/vignettes/datatable-secondary-indices-and-auto-indexing.html
+
+# secondary indices:
+# no physical reorder in RAM, but: computes order and saves it as order vector as attribute called: 
+# index!!
+
+# Set and get secondary indices
+setindex(dt, origin)
+# or 
+setindexv(dt, "origin")
+
+# remove index
+setindex(dt, NULL)
+
+# get index
+names(attributes(dt))
+# get secondary index w/ function "indices"
+indices(dt)
+
+# usecase:
+# use when ordering w/ key is expensive & time consuming
+# especially in large data.tables
+# key only makes sense, when there is a lot of sub-setting
+
+# there can be multiple secondary indices
+
+# new 'on' argument
+# for automatic creation and reuse of secondary indices
+# enables subsetting by computing secondary indices on the fly. 
+# This eliminates having to do setindex() 
+
+
+
+
+
