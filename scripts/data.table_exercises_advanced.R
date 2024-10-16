@@ -41,7 +41,8 @@ dt[c("JFK", "LAX")]
 
 # Exercise 6: Sorting with key
 # Sort the flights first by origin, then by destination, using the key
-dt[keyby = .(origin, dest)]
+
+
 
 # Exercise 7: Adding a secondary index
 # Add a secondary index on the 'carrier' column
