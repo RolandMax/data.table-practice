@@ -7,8 +7,7 @@ dt <- fread("https://raw.githubusercontent.com/Rdatatable/data.table/master/vign
 
 # Exercise 1: Using :=
 # Add a new column 'is_delayed' that is TRUE if dep_delay > 15, FALSE otherwise
-dt[, 
-   ':=' (is_delayed = ifelse(dep_delay, TRUE, FALSE))]
+dt[, is_delayed := ifelse(dep_delay > 15, TRUE, FALSE)]
 
 str(dt)
 
@@ -41,20 +40,22 @@ dt[c("JFK", "LAX")]
 
 # Exercise 6: Sorting with key
 # Sort the flights first by origin, then by destination, using the key
-
+dt[order(origin, dest)]
 
 
 # Exercise 7: Adding a secondary index
 # Add a secondary index on the 'carrier' column
-
+setindex(dt, carrier)
+indices(dt)
 
 # Exercise 8: Using a secondary index
 # Use the secondary index to quickly subset all flights by carrier "AA"
-
+dt["AA"]
 
 # Exercise 9: Combining operations
 # For each carrier, find the flight with the longest air time,
 # and return the carrier, origin, dest, and air_time columns
+dt[, .SD[which.max(air_time)], by = carrier, .SDcols = c("origin", "dest", "air_time")]
 
 
 # Exercise 10: Advanced join and update
@@ -62,5 +63,8 @@ dt[c("JFK", "LAX")]
 # Join this with flights and add a column 'delay_diff' showing how each flight's
 # delay compares to the carrier's average
 # (You'll need to create carrier_delays first)
+carrier_delays <- dt[, .(avg_delay = mean(dep_delay)), by = carrier]
+dt[carrier_delays, on = "carrier", delay_diff := dep_delay - avg_delay]
+
 
 # Good luck with your advanced exercises!
