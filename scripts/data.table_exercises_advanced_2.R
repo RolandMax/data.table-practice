@@ -31,37 +31,92 @@ dt[,
 # Exercise 4: Reshaping data
 # Create a summary table with carriers as columns and origins as rows, 
 # showing the average departure delay for each combination
-
-
+dcast(dt, origin ~ carrier, value.var = "dep_delay", fun.aggregate = mean)
 
 # Exercise 5: Advanced grouping
 # For each origin-destination pair, calculate the percentage of delayed flights
 # (considering a flight delayed if arr_delay > 15)
-
-
+dt[, 
+   .(
+     perc_delayed = round(sum(ifelse(arr_delay > 15, 1, 0))/.N * 100, 2)
+     ),
+   by = .(origin, dest)]
+#
 # Exercise 6: Cumulative statistics
 # For each carrier, calculate the cumulative sum of flight distances over the year,
 # ordered by date
-
+dt[, 
+   .(
+     cum_sum = cumsum(distance)
+   ),
+   by = .(carrier)]
 
 # Exercise 7: Conditional aggregation
 # Calculate the number of flights and average delay for each carrier,
 # but only consider flights with positive delays (both departure and arrival)
+dt[
+  arr_delay > 0 | dep_delay > 0,
+   .(
+     num_flights = .N,
+     m_total_del = mean(dep_delay) + mean(arr_delay)
+   ),
+   by = .(carrier)]
 
 
 # Exercise 8: Time-based operations
 # Assuming the 'date' column exists (if not, create it first),
 # find the busiest day (most flights) for each month
+dt[,
+   .(total_flights_day = .N),
+   by = .(day, month)
+   ][,
+     .(
+       day,
+       total_flights_day,
+       max_flights_day_month = max(total_flights_day)
+       ),
+     by = .(month)
+   ][
+     total_flights_day == max_flights_day_month,
+     .(day, month, total_flights_day)
+   ]
 
 
 # Exercise 9: Advanced sorting
 # Sort the flights first by origin, then by descending total delay (dep_delay + arr_delay),
 # and finally by ascending flight number
+dt[order(origin), 
+   "total_delay" := dep_delay + arr_delay][
+     order(total_delay, carrier)
+   ]
 
+str(dt)
 
 # Exercise 10: Complex transformation
 # Create a 'delay_category' column based on total delay (dep_delay + arr_delay):
 # 'Early' if < 0, 'On Time' if 0-15, 'Slight Delay' if 16-60, 'Long Delay' if > 60
 # Then, calculate the percentage of flights in each category for each carrier
 
-# Good luck with your advanced exercises!
+dt[,
+   "delay_category" := ifelse(total_delay < 0, "Early",
+                              ifelse(total_delay > 0 & total_delay < 15, "Slight Delay",
+                                     ifelse(total_delay > 16 & total_delay < 60, "Slight Delay",
+                                            ifelse(total_delay > 60, "Long Delay", NA
+                                                   ))))
+][,
+  .(n_carrier_delay_category = .N),
+  by = .(carrier, delay_category)
+][,
+  .(delay_category,
+    n_carrier_delay_category,
+    n_flights_carrier = sum(n_carrier_delay_category)),
+  by = .(carrier)
+][,
+  .(carrier,
+    delay_category,
+    n_carrier_delay_category,
+    perc_carrier_delay_category = round(n_carrier_delay_category/n_flights_carrier * 100, 2)
+    )]
+
+
+# Good luck with your adNULL# Good luck with your advanced exercises!
