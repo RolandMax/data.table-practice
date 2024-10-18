@@ -23,9 +23,9 @@ dt[distance > 1000,
 
 # Exercise 3: Rolling statistics
 # Calculate a 7-day rolling average of departure delays for each origin
-dt[,
-   ':=' (week = as.integer(day/7))][, ':=' (mean_week_dep_delay = mean(dep_delay)), by = week]
-
+dt[order(year, month, day), 
+   rolling_avg := frollmean(dep_delay, 7), 
+   by = .(origin)]
 
 
 # Exercise 4: Reshaping data
@@ -45,10 +45,8 @@ dt[,
 # Exercise 6: Cumulative statistics
 # For each carrier, calculate the cumulative sum of flight distances over the year,
 # ordered by date
-dt[, 
-   .(
-     cum_sum = cumsum(distance)
-   ),
+dt[order(year, month, day), 
+   .(cum_sum = cumsum(distance)), 
    by = .(carrier)]
 
 # Exercise 7: Conditional aggregation
@@ -81,6 +79,8 @@ dt[,
      .(day, month, total_flights_day)
    ]
 
+dt[, .SD[which.max(.N), .(month, day, flights = .N)], by = month]
+
 
 # Exercise 9: Advanced sorting
 # Sort the flights first by origin, then by descending total delay (dep_delay + arr_delay),
@@ -90,7 +90,9 @@ dt[order(origin),
      order(total_delay, carrier)
    ]
 
-str(dt)
+# better
+dt[order(origin, -total_delay, flight)]
+
 
 # Exercise 10: Complex transformation
 # Create a 'delay_category' column based on total delay (dep_delay + arr_delay):
@@ -117,6 +119,20 @@ dt[,
     n_carrier_delay_category,
     perc_carrier_delay_category = round(n_carrier_delay_category/n_flights_carrier * 100, 2)
     )]
+
+
+# better
+
+dt[, delay_category := fcase(
+  total_delay < 0, "Early",
+  total_delay <= 15, "On Time",
+  total_delay <= 60, "Slight Delay",
+  total_delay > 60, "Long Delay"
+)]
+
+dt[, .(
+  percentage = .N / nrow(.SD) * 100
+), by = .(carrier, delay_category)]
 
 
 # Good luck with your adNULL# Good luck with your advanced exercises!
