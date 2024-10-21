@@ -29,7 +29,7 @@
 # 4. Why use `which()` with `.SD`?
 #    - It allows you to select entire rows based on column conditions.
 #    - It's particularly useful when you want to return multiple columns for the selected row(s).
-# - It can be more efficient than other methods, especially for large datasets.
+#    - It can be more efficient than other methods, especially for large datasets.
 # 
 # 5. Advanced usage:
 #   You can combine `which()` with other functions for more complex selections:
@@ -43,8 +43,9 @@
 # ```
 # 
 # 6. Caution:
-#   - Be careful when using `which.max()` or `which.min()` if there might be NA values. These functions don't handle NA values by default.
-#    - If you need to handle NA values, you might use `which(x == max(x, na.rm = TRUE))` instead of `which.max(x)`.
+#   - Be careful when using `which.max()` or `which.min()` if there might be NA values. 
+#     These functions don't handle NA values by default.
+#   - If you need to handle NA values, you might use `which(x == max(x, na.rm = TRUE))` instead of `which.max(x)`.
 # 
 # Understanding the use of `which()` with `.SD` allows you to perform powerful row selections within groups in data.table operations. It's particularly useful when you need to select rows based on certain conditions while still retaining all the columns in your result.
 
@@ -56,39 +57,46 @@
 
 # Load required library and data
 library(data.table)
-flights <- fread("https://raw.githubusercontent.com/Rdatatable/data.table/master/vignettes/flights14.csv")
+dt <- fread("https://raw.githubusercontent.com/Rdatatable/data.table/master/vignettes/flights14.csv")
 
 # Exercise 1: Basic which.max()
 # For each origin, find the flight with the longest air_time
-
+dt[, .SD[which.max(air_time)]]
 
 # Exercise 2: Basic which.min()
 # For each carrier, find the flight with the shortest dep_delay
-
+dt[, .SD[which.min(dep_delay)]]
 
 # Exercise 3: which() with a condition
 # For each day in January, find the flight with the highest speed (distance / air_time) 
 # among flights with distance > 1000 miles
-
+dt[month == 1 & distance > 1000, .SD[which.max(distance/air_time)], by = day]
 
 # Exercise 4: Multiple column selection
 # For each origin-dest pair, find the flight with the highest total delay (dep_delay + arr_delay)
 # Return only the date, flight, carrier, and total delay columns
-
+dt[, .SD[which.max(dep_delay + arr_delay)], by = .(origin, dest)][, .(year, 
+                                                                      month, 
+                                                                      day,
+                                                                      carrier,
+                                                                      total_delay = (dep_delay + arr_delay))]
 
 # Exercise 5: Top N selection
 # For each carrier, find the top 3 flights with the longest air_time
 # Hint: You'll need to combine which() with order()
+dt[, .SD[order(-air_time)[1:3]], by = carrier]
 
 
 # Exercise 6: Conditional which()
 # For each origin, find the flight with the highest dep_delay, but only consider flights 
 # where dep_delay is less than 60 minutes
+dt[dep_delay < 60, .SD[which.max(dep_delay)], by = origin]
 
 
 # Exercise 7: which() with calculated fields
 # For each carrier, find the flight with the highest ratio of arr_delay to dep_delay
 # (Only consider flights where both delays are positive)
+
 
 
 # Exercise 8: Combining which() and aggregation
