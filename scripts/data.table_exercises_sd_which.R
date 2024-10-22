@@ -59,45 +59,6 @@
 library(data.table)
 dt <- fread("https://raw.githubusercontent.com/Rdatatable/data.table/master/vignettes/flights14.csv")
 
-# Exercise 1: Basic which.max()
-# For each origin, find the flight with the longest air_time
-dt[, .SD[which.max(air_time)]]
-
-# Exercise 2: Basic which.min()
-# For each carrier, find the flight with the shortest dep_delay
-dt[, .SD[which.min(dep_delay)]]
-
-# Exercise 3: which() with a condition
-# For each day in January, find the flight with the highest speed (distance / air_time) 
-# among flights with distance > 1000 miles
-dt[month == 1 & distance > 1000, .SD[which.max(distance/air_time)], by = day]
-
-# Exercise 4: Multiple column selection
-# For each origin-dest pair, find the flight with the highest total delay (dep_delay + arr_delay)
-# Return only the date, flight, carrier, and total delay columns
-dt[, .SD[which.max(dep_delay + arr_delay)], by = .(origin, dest)][, .(year, 
-                                                                      month, 
-                                                                      day,
-                                                                      carrier,
-                                                                      total_delay = (dep_delay + arr_delay))]
-
-# Exercise 5: Top N selection
-# For each carrier, find the top 3 flights with the longest air_time
-# Hint: You'll need to combine which() with order()
-dt[, .SD[order(-air_time)[1:3]], by = carrier]
-
-
-# Exercise 6: Conditional which()
-# For each origin, find the flight with the highest dep_delay, but only consider flights 
-# where dep_delay is less than 60 minutes
-dt[dep_delay < 60, .SD[which.max(dep_delay)], by = origin]
-
-
-# Exercise 7: which() with calculated fields
-# For each carrier, find the flight with the highest ratio of arr_delay to dep_delay
-# (Only consider flights where both delays are positive)
-
-
 
 # Exercise 8: Combining which() and aggregation
 # For each month, find the carrier with the highest average dep_delay
@@ -110,6 +71,6 @@ dt[dep_delay < 60, .SD[which.max(dep_delay)], by = origin]
 
 # Exercise 10: Advanced which() usage
 # For each origin-carrier combination, find the flight with dep_delay closest to 
-# the median dep_delay for that group
+# the median dep_delay for that groupq
 
 # Good luck with your which() and .SD exercises!
