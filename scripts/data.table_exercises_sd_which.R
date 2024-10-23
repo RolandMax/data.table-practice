@@ -60,39 +60,110 @@ library(data.table)
 dt <- fread("https://raw.githubusercontent.com/Rdatatable/data.table/master/vignettes/flights14.csv")
 
 
-# Exercise 8: Combining which() and aggregation
-# For each month, find the carrier with the highest average dep_delay
-dt[,
-   .SD[which.max(mean(dep_delay))],
-       by = .(month)]
+# Data.table Advanced Exercises and Solutions
+# Note: Assuming 'dt' is your flights data.table
 
-# Exercise 9: Using which() for data quality checks
-# For each carrier, find any flights where the air_time is greater than the time difference
-# between arr_time and dep_time (you may need to calculate this difference first)
+#-----------------------------------------------------------------------------
+# Exercise 1: Finding carrier with highest average departure delay by month
+#-----------------------------------------------------------------------------
+# Task: For each month, find the carrier with the highest average dep_delay
 
-dt[, diff := arr_time - dep_delay]
-dt[,
-   .SD[which(air_time < diff)],
-   by = carrier]
+# Solution:
+dt[, .(avg_delay = mean(dep_delay)), by = .(month, carrier)
+][, .SD[which.max(avg_delay)], by = month]
 
-# Exercise 10: Advanced which() usage
-# For each origin-carrier combination, find the flight with dep_delay closest to 
-# the median dep_delay for that groupq
+#-----------------------------------------------------------------------------
+# Exercise 2: Data quality check for flight times
+#-----------------------------------------------------------------------------
+# Task: For each carrier, find flights where the air_time is greater than 
+# the time difference between arr_time and dep_time
 
+# Solution:
+dt[, {
+  # Calculate actual time difference accounting for midnight crossing
+  time_diff = ifelse(arr_time < dep_time,
+                     arr_time + 2400 - dep_time,
+                     arr_time - dep_time)
+  .SD[which(air_time > time_diff)]
+}, by = carrier]
 
-# Exercise 8: Conditional Selection with Multiple Criteria
-# For each month, find the flight that had:
+#-----------------------------------------------------------------------------
+# Exercise 3: Finding flights closest to median delay
+#-----------------------------------------------------------------------------
+# Task: For each origin-carrier combination, find the flight with dep_delay 
+# closest to the median dep_delay for that group
+
+# Solution:
+dt[, {
+  med = median(dep_delay)
+  .SD[which.min(abs(dep_delay - med))]
+}, by = .(origin, carrier)]
+
+#-----------------------------------------------------------------------------
+# Exercise 4: Complex flight time ratio analysis
+#-----------------------------------------------------------------------------
+# Task: For each month, find the flight that had:
 # - The highest ratio of actual flight time to scheduled flight time 
-# - But only consider flights where distance > 500 miles
+# - Only consider flights where distance > 500 miles
 # - And arr_delay was less than 30 minutes
-# Write your solution here:
 
+# Solution:
+dt[distance > 500 & arr_delay < 30, {
+  # Calculate scheduled flight time from actual and delays
+  sched_time = air_time - arr_delay + dep_delay
+  .SD[which.max(air_time/sched_time)]
+}, by = month]
 
-# Exercise 9: Rolling Maximum with Groups
-# For each carrier-origin combination, find flights where:
+#-----------------------------------------------------------------------------
+# Exercise 5: Rolling maximum delays
+#-----------------------------------------------------------------------------
+# Task: For each carrier-origin combination, find flights where:
 # - The dep_delay was higher than all previous flights that day
 # - Return only flights that set a new "record" for delays
-# Write your solution here:
+
+# Solution:
+dt[order(carrier, origin, dep_time),
+   .SD[which(dep_delay == cummax(dep_delay))],
+   by = .(carrier, 
+          origin, 
+          date = as.Date(paste(year, month, day, sep = "-")))]
+
+#-----------------------------------------------------------------------------
+# Exercise 6: Route performance analysis
+#-----------------------------------------------------------------------------
+# Task: For each origin-destination pair with at least 20 flights:
+# - Find flights that exceeded the route's average air_time by more than 30 minutes
+# - Calculate what percentile this flight's air_time was for the route
+
+# Solution:
+dt[, .SD[{
+  # Only process routes with sufficient flights
+  if (.N >= 20) {
+    avg_time = mean(air_time)
+    exceeded = which(air_time > (avg_time + 30))
+    if (length(exceeded) > 0) {
+      # Calculate percentile for these flights
+      .SD[exceeded][, percentile := rank(air_time)/.N * 100]
+    }
+  }
+}], by = .(origin, dest)]
+
+#-----------------------------------------------------------------------------
+# Exercise 7: Efficiency score calculation
+#-----------------------------------------------------------------------------
+# Task: For each carrier-month combination:
+# - Calculate an efficiency score: (distance/air_time) * (1 - dep_delay/100)
+# - Find the top 3 most efficient flights
+# - Only consider flights with positive delays less than 60 minutes
+
+# Solution:
+dt[dep_delay > 0 & dep_delay < 60, {
+  eff_score = (distance/air_time) * (1 - dep_delay/100)
+  .SD[order(-eff_score)[1:3]]
+}, by = .(carrier, month)]
+
+# Note: All solutions assume appropriate data types and no missing values.
+# In practice, you might need additional data validation and error handling.
 
 
 # Exercise 10: Comparative Analysis
