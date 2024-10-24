@@ -173,6 +173,17 @@ dt[dep_delay > 0 & dep_delay < 60, {
 # - Only consider routes with at least 10 flights
 # Write your solution here:
 
+# Calculate group sizes
+dt[, ':='(n = .N), by = .(origin, dest)]
+
+# Filter and calculate mean for groups with n >= 10
+dt[n >= 10, ':='(mean_air_time = mean(air_time)), by = .(origin, dest)]
+
+# Calculate difference from mean
+dt[n >= 10, ':='(diff_air_time = air_time - mean_air_time), by = .(origin, dest)]
+
+dt[, .SD[which.max(diff_air_time)], by = .(origin, dest)]
+
 
 # Exercise 11: Time-based Analysis with Multiple Conditions
 # For each carrier in summer months (6,7,8):
@@ -180,6 +191,12 @@ dt[dep_delay > 0 & dep_delay < 60, {
 # - Score = (100 - dep_delay) + (distance/100)
 # - Only consider flights that departed before noon
 # Write your solution here:
+
+dt[month %in% c(6,7,8) & hour < 12]
+
+dt[, ':='(score = (100 - dep_delay) + (distance/100)), by = carrier]
+
+dt[, .SD[which.max(score)], by = carrier]
 
 
 # Exercise 12: Relative Performance
