@@ -206,6 +206,14 @@ dt[, .SD[which.max(score)], by = carrier]
 # - Speed = distance/air_time
 # Write your solution here:
 
+str(dt)
+
+dt[, {speed = distance/air_time
+      median_speed = median(speed)
+      .SD[which.max(speed - median_speed)]},
+   by = .(origin, date = as.Date(paste(year, month, day, sep = "-")))]
+
+
 
 # Exercise 13: Complex Grouping with Conditions
 # For each carrier-month combination:
@@ -217,6 +225,16 @@ dt[, .SD[which.max(score)], by = carrier]
 #   * arr_delay < 45
 # Write your solution here:
 
+str(dt)
+
+efficiency <- function(distance, air_time, dep_delay){
+  x <- (distance/air_time) * (1 - dep_delay/100)
+  return(x)
+}
+
+dt[distance > 300 & between(dep_delay, 0, 30) & arr_delay < 45,
+   .SD[which.max(efficiency(distance, air_time, dep_delay))],
+   by = .(carrier, month)]
 
 # Exercise 14: Multi-metric Optimization
 # For each origin-destination pair:
@@ -226,7 +244,24 @@ dt[, .SD[which.max(score)], by = carrier]
 #                 (distance/air_time) * 0.2
 # - Only consider flights that operated on weekends
 # Write your solution here:
+unique(dt$day)
+str(dt)
 
+performance_score <- function(dep_delay, arr_delay, distance, air_time){
+  x <- (100 - dep_delay) * 0.4 + 
+       (100 - arr_delay) * 0.4 +
+       (distance/air_time) * 0.2
+  return(x)
+}
+
+
+dt[, c("date") := .(as.Date(paste(year, month, day, sep = "-")))
+   ][,
+     "weekdays" := .(weekdays(date, abbr = TRUE))]
+
+dt[weekdays %in% c("Sa", "Sun"),
+   .SD[which.max(performance_score(dep_delay, arr_delay, distance, air_time))],
+   by = .(origin, dest)]
 
 # Exercise 15: Sequential Analysis
 # For each carrier:
@@ -235,3 +270,10 @@ dt[, .SD[which.max(score)], by = carrier]
 # - Metrics: dep_delay, arr_delay, and air_time
 # Write your solution here:
 
+dt[order(carrier, date),
+   .SD[which(
+     dep_delay < shift(dep_delay, 1) &
+     arr_delay < shift(arr_delay, 1) &
+     air_time < shift(air_time, 1))],
+   by = .(carrier, date)
+   ]
