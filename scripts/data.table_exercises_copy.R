@@ -103,7 +103,16 @@ print(dt4)
 # Do this with and without copy()
 
 # Your code here:
+dt_new <- copy(dt)
+dt_new[, "status" := fcase(score >= 90, "Excellent",
+                           score >= 80, "Good",
+                           default = "Need Improvement")]
 
+
+dt_new_2 <- dt
+dt_new_2[, "status" := fcase(score >= 90, "Excellent",
+                           score >= 80, "Good",
+                           default = "Need Improvement")]
 
 
 
@@ -116,8 +125,10 @@ print(dt4)
 # - Don't copy if all scores are below 90
 
 # Your code here:
+has_As <- any(dt$grade == 'A')
+all_low_scores <- all(dt$score > 90)
 
-
+if(has_As && !all_low_scores) copy(dt) else dt
 
 
 #################################################
@@ -148,8 +159,22 @@ large_dt <- data.table(
 # 1. First without using copy()
 # 2. Then with copy()
 
-# Your code here:
+dt[,]
 
+# Your code here:
+dt_funct <- function(dt){
+  dt[, ':='(score_update = (score + 15)/2)]
+}
+
+dt_funct_2 <- function(dt){
+  dt2 <- copy(dt)
+  dt2[, ':='(score_update = (score + 15)/2)]
+}
+
+
+
+dt_funct_2(dt)
+dt2
 
 
 
