@@ -71,12 +71,17 @@ students_grades_dt <- data.table(
   grade = c("B", "A", "C", "A", "B", "C", "A", "B", "C", "B", "A", "B")
 )
 
+
+
+
 # Then cast it to wide format keeping both score and grade
 # Hint: Use dcast with value.var = c("score", "grade")
 
 # Your code here:
+students_grades_dt
 
-
+dcast(students_grades_dt,  student_id ~ subject,
+      value.var = c("score", "grade"))  
 
 #################################################
 # Exercise 4: Aggregation in Casting
