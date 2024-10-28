@@ -42,8 +42,10 @@ skills_dt <- data.table(
 # Hint: Use dcast with formula: student_id ~ subject
 
 # Your code here:
+students_dt
 
-
+dcast(students_dt, student_id ~ subject, value.var = "score")
+  
 
 #################################################
 # Exercise 2: Basic Casting
@@ -54,7 +56,8 @@ skills_dt <- data.table(
 # Hint: Use measure.vars for quarter columns
 
 # Your code here:
-
+melt(sales_dt, id.vars = c("store", "year"),
+     measure.vars = c("q1_sales", "q2_sales", "q3_sales"))
 
 
 #################################################
