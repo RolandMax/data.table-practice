@@ -92,7 +92,17 @@ dcast(students_grades_dt,  student_id ~ subject,
 # Hint: Use dcast with fun.agg
 
 # Your code here:
+result <- dcast(students_dt, 
+                subject ~ ., 
+                value.var = "score",
+                fun.agg = list(
+                  Min = min,
+                  Max = max,
+                  Average = mean
+                ))
 
+print("Subject Statistics:")
+print(result)
 
 
 #################################################
@@ -105,6 +115,12 @@ dcast(students_grades_dt,  student_id ~ subject,
 # Hint: Use measure.vars and variable.name/value.name
 
 # Your code here:
+skills_dt
+melt(skills_dt, 
+     id.vars = c("employee_id", "name"), 
+     measure.vars = c("python", "sql", "r"),
+     variable.name = "skills",
+     value.name = "number")
 
 
 
