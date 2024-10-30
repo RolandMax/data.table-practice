@@ -135,11 +135,15 @@ melt(skills_dt,
 # Your code here:
 sales_dt
 
+sales_dt <- 
 melt(sales_dt, 
      id.vars = c("store", "year"),
      measure.vars = patterns("q."),
      variable.name = "quarter",
      value.name = "sales")
+
+sales_dt[,
+         ':='(quarter = gsub(pattern = "_sales", replacement = "", quarter))]
 
 
 #################################################
