@@ -133,7 +133,13 @@ melt(skills_dt,
 # Hint: Use patterns in measure.vars
 
 # Your code here:
+sales_dt
 
+melt(sales_dt, 
+     id.vars = c("store", "year"),
+     measure.vars = patterns("q."),
+     variable.name = "quarter",
+     value.name = "sales")
 
 
 #################################################
