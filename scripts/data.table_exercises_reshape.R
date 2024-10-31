@@ -164,7 +164,15 @@ complex_dt <- data.table(
 # Hint: This is a two-step process
 
 # Your code here:
+complex_dt <- 
+  dcast(complex_dt, 
+      region+year+sales+profit~product)
 
+melt(complex_dt,
+     id.vars = c("region", "year", "sales", "profit", "A", "B"),
+     measure.vars = c("B", "C"),
+     variable.name = "product",
+     value.name = "product_value")
 
 
 #################################################
@@ -184,7 +192,14 @@ dates_dt <- data.table(
 # Hint: Use format(date, "%b") for month abbreviations
 
 # Your code here:
+dates_dt <- 
+melt(dates_dt, 
+     id.vars = c("date"),
+     measure.vars = patterns("value."),
+     variable.name = "A_B",
+     value.name = "value")
 
-
+dates_dt[,  ':='(month = format(date, "%b"))]
+dcast(dates_dt, date+A_B+value~month)
 
 print("End of exercises")
