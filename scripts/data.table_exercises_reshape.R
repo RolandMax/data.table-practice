@@ -276,23 +276,25 @@ dcast(transactions_dt,
 # Hint: You may need multiple steps and multiple reshaping operations
 
 # Your code here:
-performance_dt
-
+# Step 1: Create quarter column more comprehensively
 performance_dt[,
-               ':='(quarter = fcase(month %in% c("Jan", "Feb", "Mar"), "Q1",
-                     default = "Q2"))]
+               ':='(quarter = fcase(
+                 month %in% c("Jan", "Feb", "Mar"), "Q1",
+                 month %in% c("Apr", "May", "Jun"), "Q2",
+                 month %in% c("Jul", "Aug", "Sep"), "Q3",
+                 month %in% c("Oct", "Nov", "Dec"), "Q4"
+               ))]
 
-performance_dt <- 
-  melt(performance_dt, 
-     id.vars = c("employee_id", "year", "quarter"),
-     measure.vars = c("productivity", "quality", "attendance")
-     )
+# Step 2: Melt the metrics
+melted_dt <- melt(performance_dt, 
+                  id.vars = c("employee_id", "year", "quarter", "month"),
+                  measure.vars = c("productivity", "quality", "attendance"))
 
-dcast(performance_dt,
-      employee_id ~ paste0(variable, "_", quarter, "_", year), 
-      fun.aggregate = mean)
-
-
+# Step 3: Calculate quarterly averages and reshape
+dcast(melted_dt,
+      employee_id ~ paste0(variable, "_", quarter, "_", year),
+      fun.aggregate = mean,
+      value.var = "value")
 #################################################
 # Exercise 3: Complex Pattern-Based Reshaping
 #################################################
