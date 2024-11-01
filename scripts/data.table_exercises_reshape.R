@@ -202,4 +202,164 @@ melt(dates_dt,
 dates_dt[,  ':='(month = format(date, "%b"))]
 dcast(dates_dt, date+A_B+value~month)
 
-print("End of exercises")
+
+
+# Intermediate  data.table reshape exercises ------------------------------
+
+
+library(data.table)
+
+#################################################
+# Setup: Create sample datasets for exercises
+#################################################
+
+# Dataset 1: Customer transactions with nested categories
+transactions_dt <- data.table(
+  customer_id = rep(1:3, each = 4),
+  date = rep(as.Date("2024-01-01") + 0:3, 3),
+  category_main = rep(c("Electronics", "Food", "Electronics", "Food"), 3),
+  category_sub = rep(c("Phones", "Groceries", "Laptops", "Restaurant"), 3),
+  amount = round(rnorm(12, mean = 500, sd = 200), 2),
+  payment_method = rep(c("Credit", "Debit", "Cash", "Credit"), 3)
+)
+
+# Dataset 2: Employee performance metrics over time
+performance_dt <- data.table(
+  employee_id = rep(1:4, each = 12),
+  year = rep(rep(2022:2023, each = 6), 4),
+  month = rep(month.abb[1:6], 8),
+  productivity = round(rnorm(48, mean = 85, sd = 10), 1),
+  quality = round(rnorm(48, mean = 90, sd = 5), 1),
+  attendance = round(rnorm(48, mean = 95, sd = 3), 1)
+)
+
+# Dataset 3: Product inventory across locations
+inventory_dt <- data.table(
+  location = rep(c("North", "South", "East", "West"), each = 3),
+  product = rep(c("Widget", "Gadget", "Tool"), 4),
+  stock_2022_Q1 = round(rnorm(12, 100, 20)),
+  stock_2022_Q2 = round(rnorm(12, 110, 20)),
+  stock_2023_Q1 = round(rnorm(12, 105, 20)),
+  stock_2023_Q2 = round(rnorm(12, 115, 20))
+)
+
+#################################################
+# Exercise 1: Hierarchical Reshaping
+#################################################
+# Task: Using transactions_dt:
+# 1. Create a wide format showing total amount spent by each customer
+#    for each combination of main and sub category
+# 2. Column names should be in format: main_sub
+# 
+# Expected output columns: customer_id, Electronics_Phones, Electronics_Laptops, 
+#                         Food_Groceries, Food_Restaurant
+# 
+# Hint: Use paste0() within dcast formula
+
+# Your code here:
+dcast(transactions_dt,
+      customer_id ~ paste0(category_main, "_", category_sub),
+      value.var = "amount",
+      fun.aggregate = sum)
+
+#################################################
+# Exercise 2: Time Series Reshaping with Multiple Metrics
+#################################################
+# Task: Using performance_dt:
+# 1. Create a quarter column based on months
+# 2. Calculate average metrics per employee per quarter-year
+# 3. Reshape to show each metric as columns with quarter-year suffix
+#
+# Expected output format: employee_id, productivity_Q1_2022, quality_Q1_2022, 
+#                        attendance_Q1_2022, productivity_Q2_2022, etc.
+#
+# Hint: You may need multiple steps and multiple reshaping operations
+
+# Your code here:
+performance_dt
+
+performance_dt[,
+               ':='(quarter = fcase(month %in% c("Jan", "Feb", "Mar"), "Q1",
+                     default = "Q2"))]
+
+performance_dt <- 
+  melt(performance_dt, 
+     id.vars = c("employee_id", "year", "quarter"),
+     measure.vars = c("productivity", "quality", "attendance")
+     )
+
+dcast(performance_dt,
+      employee_id ~ paste0(variable, "_", quarter, "_", year), 
+      fun.aggregate = mean)
+
+
+#################################################
+# Exercise 3: Complex Pattern-Based Reshaping
+#################################################
+# Task: Using inventory_dt:
+# 1. Melt the stock columns into year, quarter, and value columns
+# 2. Calculate year-over-year growth for each location-product combination
+# 3. Reshape final result to show growth by quarters as columns
+#
+# Expected output: location, product, Q1_growth, Q2_growth
+#
+# Hint: Use patterns in melt and handle the split of year/quarter carefully
+
+# Your code here:
+
+
+#################################################
+# Exercise 4: Multi-Level Aggregation with Reshaping
+#################################################
+# Task: Using transactions_dt:
+# 1. Create summary statistics (mean, median, count) for amounts
+# 2. Calculate these stats at both main category and sub-category levels
+# 3. Reshape the result to show statistics as columns
+#
+# Expected output should show statistics for both aggregation levels in a single table
+#
+# Hint: You might need multiple aggregation steps and careful reshaping
+
+# Your code here:
+
+
+#################################################
+# Exercise 5: Rolling Time Window with Reshaping
+#################################################
+# Task: Using performance_dt:
+# 1. Calculate 3-month rolling averages for each metric
+# 2. Reshape to show metrics as columns with both current and rolling values
+# 3. Format the result to show percentage differences
+#
+# Expected output: Should show current values, rolling averages, and percentage differences
+#                 for each metric in separate columns
+#
+# Hint: Use shift() and rolling calculations before reshaping
+
+# Your code here:
+
+
+#################################################
+# Bonus Challenge: Combined Operations
+#################################################
+# Task: Create a comprehensive analysis using transactions_dt:
+# 1. Calculate daily totals by payment method and main category
+# 2. Create rolling 3-day averages
+# 3. Reshape to show payment methods as columns
+# 4. Calculate percentage of total daily sales for each payment method
+#
+# Hint: This will require combining several of the techniques from above exercises
+
+# Your code here:
+
+
+
+
+
+
+
+
+
+
+
+
