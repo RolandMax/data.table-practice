@@ -308,7 +308,28 @@ dcast(melted_dt,
 # Hint: Use patterns in melt and handle the split of year/quarter carefully
 
 # Your code here:
+# Step 1: Melt the stock columns to long format
+inventory_long <- melt(
+  inventory_dt,
+  id.vars = c("location", "product"),
+  measure.vars = patterns("stock_"),
+  variable.name = "period",
+  value.name = "stock"
+)
 
+# Step 2: Split period into year and quarter
+inventory_long[, c("year", "quarter") := tstrsplit(gsub("stock_", "", period), "_")]
+
+# Step 3: Calculate year-over-year growth
+growth_dt <- inventory_long[order(location, product, quarter, year)
+][, growth := ((stock / shift(stock) - 1) * 100),
+  by = .(location, product, quarter)
+][!is.na(growth)]
+
+# Step 4: Reshape to show quarters as columns
+dcast(growth_dt,
+      location + product ~ quarter,
+      value.var = "growth")
 
 #################################################
 # Exercise 4: Multi-Level Aggregation with Reshaping
@@ -322,8 +343,29 @@ dcast(melted_dt,
 #
 # Hint: You might need multiple aggregation steps and careful reshaping
 
-# Your code here:
+# Step 1: Your aggregations are good
+agg_main <- transactions_dt[, .(mean = mean(amount), 
+                                median = median(amount), 
+                                count = .N), 
+                            by = category_main]
 
+agg_sub <- transactions_dt[, .(mean = mean(amount), 
+                               median = median(amount), 
+                               count = .N), 
+                           by = .(category_main, category_sub)]
+
+# Step 2: Adding level indicators is good
+agg_main[, level := "main"]
+agg_sub[, level := "sub"]
+
+# Step 3: Combine tables first
+combined_stats <- rbindlist(list(agg_main, agg_sub), fill = TRUE)
+
+# Step 4: Now reshape if needed to get statistics as columns
+# If you want to reshape, it would be something like:
+result <- dcast(combined_stats, 
+                category_main + category_sub + level ~ ., 
+                value.var = c("mean", "median", "count"))
 
 #################################################
 # Exercise 5: Rolling Time Window with Reshaping
