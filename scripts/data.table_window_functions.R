@@ -126,6 +126,14 @@ employee_dt[,
 # - Running maximum sales achieved
 # Hint: Use cumsum(), cumean(), and cummax() with by and order()
 
+
+sales_dt[order(date),
+         ':='(cumsum_dep = cumsum(sales),
+              mean_dep =  cumsum(sales)/seq_len(.N),
+              cummax_dep = cummax(sales)),
+         by = store,
+         ]
+
 # Exercise 3: Sales Rankings Over Time
 # Task: For each day's sales record, add columns showing:
 # - Daily rank among all stores (1 = highest sales that day)
@@ -133,12 +141,34 @@ employee_dt[,
 # - Percentile rank of sales within store
 # Hint: Use frank() with different by groups
 
+copy(
+  sales_dt[,
+           ':='(daily_rank_store = frank(-sales)),  # Added minus for highest=1
+           by = .(date)
+  ][,
+    ':='(
+      histo_rank_store = frank(-sales),    # Added minus for highest=1
+      percentile_rank = frank(sales, ties.method = "random") / .N
+    ),
+    by = .(store)
+  ]
+)
+
+
 # Exercise 4: Previous and Next Day Comparisons
 # Task: For each store's daily sales, add columns showing:
 # - Previous day's sales
 # - Next day's sales
 # - Percentage change from previous day
 # Hint: Use shift() with different n values
+copy(
+  sales_dt[order(date),  # Important to order by date first
+           ':='(prev_sales = shift(sales, 1),
+                next_sales = shift(sales, -1),
+                perc_change = ((sales - shift(sales, 1)) / shift(sales, 1)) * 100),
+           by = store]  # Added by = store
+)
+
 
 # Exercise 5: Moving Window Calculations
 # Task: For each store's sales, add columns showing:
