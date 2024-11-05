@@ -197,7 +197,7 @@ copy(
 # Hint: Combine order(), shift(), and cumulative calculations
 
 employee_dt[order(join_date),
-            ':='()
+            ':='(n_emp_joined = frollapply(emp_id, 8, .N))
             ]
 
 
