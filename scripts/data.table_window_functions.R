@@ -177,6 +177,16 @@ copy(
 # - 3-day moving maximum
 # Hint: Use frollmean(), frollsum(), and frollmax()
 
+copy(
+  sales_dt[order(date),
+           ':='(
+             move_mean = frollmean(sales, 3),
+             move_sum = frollsum(sales, 3)
+             # move_max = frollmax(sales, 1)
+           ),
+           by = store]
+)
+
 # ============ BONUS CHALLENGES ============
 
 # Challenge 1: Employee Timeline Analysis
@@ -185,6 +195,11 @@ copy(
 # - Average salary of people who joined before them in their department
 # - Their salary compared to the department average at their join date
 # Hint: Combine order(), shift(), and cumulative calculations
+
+employee_dt[order(join_date),
+            ':='()
+            ]
+
 
 # Challenge 2: Sales Performance Windows
 # For each store's daily sales, add columns showing:
