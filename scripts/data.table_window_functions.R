@@ -196,10 +196,41 @@ copy(
 # - Their salary compared to the department average at their join date
 # Hint: Combine order(), shift(), and cumulative calculations
 
-employee_dt[order(join_date),
-            ':='(n_emp_joined = frollapply(emp_id, 8, .N))
-            ]
+# Load required library if not already loaded
+library(data.table)
 
+# Create the employee dataset
+employee_dt <- data.table(
+  emp_id = 1:8,
+  department = rep(c("Sales", "IT", "HR", "Marketing"), each = 2),
+  salary = c(50000, 55000, 65000, 70000, 45000, 48000, 52000, 54000),
+  join_date = as.Date(c("2023-01-15", "2023-03-01", "2023-02-01", 
+                        "2023-04-15", "2023-01-01", "2023-05-01",
+                        "2023-03-15", "2023-06-01"))
+)
+
+# Calculate all required metrics
+result_dt <- employee_dt[order(department, join_date)][
+  # Calculate number of people who joined before in each department
+  , prior_joins := seq_len(.N) - 1
+  , by = department][
+    # Calculate running average salary by department
+    , prior_avg_salary := shift(cumsum(salary) / seq_len(.N), fill = NA)
+    , by = department][
+      # Calculate department average at join date
+      , dept_avg_at_join := sapply(seq_len(.N), function(i) {
+        dept_salaries <- salary[seq_len(i)]
+        mean(dept_salaries)
+      })
+      , by = department][
+        # Calculate salary comparison to department average
+        , salary_vs_avg := salary - dept_avg_at_join]
+
+# Order results by department and join date for clear viewing
+setorder(result_dt, department, join_date)
+
+# Print results
+print(result_dt)
 
 # Challenge 2: Sales Performance Windows
 # For each store's daily sales, add columns showing:
