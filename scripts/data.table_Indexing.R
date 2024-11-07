@@ -1,6 +1,43 @@
 # Load the data.table library
 library(data.table)
 
+
+# Create a sample data.table
+dt <- data.table(
+  name = c("John", "Sarah", "Michael", "Emily", "James", "Jessica", "David", "Samantha"),
+  age = c(28, 35, 42, 29, 51, 27, 38, 33),
+  salary = c(45000, 65000, 72000, 55000, 85000, 48000, 92000, 60000)
+)
+
+# Exercise 1
+# Use .I to get the row indexes of entries where age is greater than 30 and salary is less than 50000
+dt[dt[, .I[which(age < 30)]]]  
+
+
+# Exercise 2
+# Use .I to get the row indexes of the 3 entries with the highest salaries
+dt[, .I[which(age < 30)][1:3]]  
+
+
+
+# Exercise 3 
+# Use .I to get the row indexes of entries where the name starts with 'J' or 'S'
+dt[, .I[which(grepl("^J|^S",name))]]  
+
+
+# Exercise 4
+# Create a new column 'is_manager' in 'dt' that is TRUE if the salary is greater than 80000, else FALSE
+# Use .I to get the row indexes of entries where is_manager is TRUE
+dt[, is_manager := .(salary > 80000)][, .I[which(is_manager == TRUE)]]
+
+
+# Exercise 5
+# Use .I to get the row indexes of the top 20% of entries ordered by salary
+dt[, .I[which(salary > quantile(dt$salary, probs = (0.80)))]]
+
+
+# Old Exercises -----------------------------------------------------------
+
 # Exercise 1: Create a data.table and identify row indices with a specific condition
 # -----------------------------------------------------------------------------
 # 1. Create a data.table `dt1` with columns `ID` (1 to 10) and `Score` (random values between 50 and 100).
